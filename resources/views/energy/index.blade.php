@@ -1,15 +1,31 @@
 <!DOCTYPE html>
+
 <html lang="en">
+
 <head>
+    
     <meta charset="UTF-8">
+
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
     <title>Energy Monitor Pro</title>
+
     <script src="https://cdn.tailwindcss.com"></script>
+
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
     <script src="https://cdn.jsdelivr.net/npm/apexcharts"></script>
+
     <script src="https://unpkg.com/@lottiefiles/lottie-player@latest/dist/lottie-player.js"></script>
+
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <style>
+    
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+   
+   <style>
+    
         @keyframes float {
             0% { transform: translateY(0px); }
             50% { transform: translateY(-10px); }
@@ -274,7 +290,8 @@
         </div>
     </div>
 
-    @include('energy.location-modal')
+    <!-- Include Location Modal -->
+    @include('location-modal')
 
     <!-- Footer -->
     <footer class="bg-gray-800 bg-opacity-50 backdrop-blur-lg border-t border-gray-700 mt-16">
@@ -499,8 +516,9 @@
                 }
             });
         }
+    6
 
-        // Initialize Historical Chart
+
         function initHistoricalChart() {
             const ctx = document.getElementById('historicalChart');
             new Chart(ctx, {
@@ -756,20 +774,44 @@
         });
 
         // Update location function
-        function updateLocation(lat, lng, name) {
+        function updateLocation(formData) {
+            const lat = formData.get('latitude');
+            const lng = formData.get('longitude');
+            const name = formData.get('locationName');
+            
+            if (!lat || !lng || !name) {
+                console.error('Missing required location data');
+                return;
+            }
+
             // Update the location name in the navigation bar
             document.querySelector('.text-gray-400 span').textContent = name;
-            // Redirect to the new location
+            
+            // Redirect to the new location with proper parameters
             window.location.href = `/?latitude=${lat}&longitude=${lng}&location_name=${encodeURIComponent(name)}`;
         }
 
-        // Update the location modal form submission
-        document.getElementById('locationForm').addEventListener('submit', function(e) {
-            e.preventDefault();
-            const lat = document.getElementById('latitude').value;
-            const lng = document.getElementById('longitude').value;
-            const name = document.getElementById('locationName').value;
-            updateLocation(lat, lng, name);
+        // Initialize event listeners when the document is ready
+        document.addEventListener('DOMContentLoaded', function() {
+            // Initialize map
+            initMap();
+
+            // Add form submission handlers
+            const mapForm = document.getElementById('mapForm');
+            if (mapForm) {
+                mapForm.addEventListener('submit', function(e) {
+                    e.preventDefault();
+                    const formData = new FormData(this);
+                    updateLocation(formData);
+                });
+            }
+        });
+
+        // Initialize the map when the modal is opened
+        document.getElementById('locationModal').addEventListener('shown.bs.modal', function() {
+            if (!map) {
+                initMap();
+            }
         });
     </script>
 </body>
